@@ -1,0 +1,13 @@
+# Build artifacts
+[Bb]in/
+[Oo]bj/
+
+.vscode/
+
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+appsettings.Development.json
+
+.env
