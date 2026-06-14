@@ -1,257 +1,411 @@
-``` bash
-    # This is an OJT project for DHSUD as part of our BSIT On-The-Job Training requirements on STI College Legazpi
+# Project Monitoring and Management System (PMMS)
+
+> An On-the-Job Training (OJT) project developed for DHSUD-HREDRD as part of the BSIT OJT requirements at STI College Legazpi.
+
+---
+
+## 📌 Overview
+
+The **Project Monitoring and Management System (PMMS)** is a centralized project storage and monitoring platform designed for **DHSUD-HREDRD**.
+
+The system provides project tracking, expiration monitoring, automated notifications, and role-based access control.
+
+### Main Objectives
+
+- Reduce manual project tracking workload
+- Organize workflows and responsibilities
+- Minimize human errors
+- Centralize project records and documentation
+- Automate expiration monitoring and reporting
+
+---
+
+## 🚀 Key Features
+
+- Centralized project repository
+- Project expiration tracking
+- Automated notification system
+- Daily monitoring and reporting
+- Role-based access control
+- Draft management for temporary users
+- Province-based project access restrictions
+- Automatic expiration status updates
+
+### Expiration Monitoring
+
+The system monitors project expirations and:
+
+- Detects projects nearing expiration (within 2 months)
+- Sends daily notifications for upcoming expirations
+- Tracks expired projects
+- Generates automatic logs and reports
+- Runs scheduled monitoring every day at **1:00 AM**
+
+---
+
+## 📋 Project Information
+
+| Item | Value |
+|--------|--------|
+| Version | V0.1 |
+| Development Duration | 2 Months |
+| V1 Completion Date | June 9, 2026 |
+
+---
+
+## ⚠️ Current Status
+
+The server is currently running on **Version 1 (V1)**.
+
+Further updates, enhancements, and testing are required, including:
+
+- Feature improvements
+- Bug fixes
+- Stress testing
+- Intentional failure testing to identify system weaknesses
+- Performance optimization
+
+---
+
+# 🛠 Technology Stack
+
+## Core Framework
+
+| Component | Technology |
+|------------|-------------|
+| Runtime | .NET 10 |
+| Application Type | ASP.NET Core Web Application |
+
+---
+
+## Data & Persistence
+
+| Component | Technology |
+|------------|-------------|
+| ORM | Entity Framework Core 10 |
+| Database | PostgreSQL (Npgsql) |
+| Identity | ASP.NET Core Identity |
+
+---
+
+## Architecture & Patterns
+
+| Component | Technology |
+|------------|-------------|
+| Mediation | MediatR |
+| Mapping | Mapster |
+| Validation | FluentValidation |
+| Background Jobs | Quartz.NET |
+
+---
+
+## Security & API
+
+| Component | Technology |
+|------------|-------------|
+| Authentication | JWT Bearer Authentication |
+| API Documentation | Scalar |
+
+---
+
+# 📂 Project Structure
+
+### Features
+
+```text
+PMMS.Server
+└── Features
 ```
 
-## What is PMMS?
-    Project Monitoring and Management System(PMMS) are designed to be a centralized
-    project storage for DHSUD-HREDRD, it has 3 roles or actors which are ADMIN, PERMANENT, and TEMPORARY.
-    Its main feature is to track the projects that are 2 months before its expiration.
-    The system will send a notification everyday if an expiration entered the 2 months prior.
-    The incoming expiration and expired projects will be tracked, update changes and send log automatically everyday at 1:00 am
+### Domain Entities
 
-## Whats the purpose of PMMS?
-    To reduce the loads of tracking manually,
-    to organize workflow and separations of concerns,
-    to minimize human errors,
-    and to centralize the collection of all projects
+```text
+PMMS.Server
+└── Domain
+    └── Entities
+```
 
-## Version:
-    V 0.1
+### Entity Configurations
 
-## Development Duration:
-    2 months
+```text
+PMMS.Server
+└── Infrastructure
+    └── Persistence
+        └── Configurations
+```
 
-## V1 Completion Date:
-    June 9, 2026
+---
 
-## NOTE:
-    the server is still on V1 and updates/changes should be done including a test which includes
-    breaking the server on purpose to identify the bugs
+# 🔐 Sample Admin Account
 
-## TECH STACK
-**Core Framework**
-    Runtime/Framework: 
-        .NET 10.0
-    Application Type: 
-        ASP.NET Core Web Application
+For development purposes only:
 
-**Data & Persistence**
-    ORM: 
-        Entity Framework Core 10
-    Database Provider:  
-        PostgreSQL (via Npgsql)
-    Identity: 
-        ASP.NET Core Identity (integrated with EF Core for user management)
+```bash
+cd PMMS.Server
+dotnet user-secrets list
+```
 
-**Architecture & Patterns**
-    Mediation: 
-        MediatR (Implements the Mediator pattern, commonly used for CQRS)
-    Mapping: 
-        Mapster (High-performance object-to-object mapper)
-    Validation: 
-        FluentValidation (Strongly-typed validation rules)
-    Background Jobs: 
-        Quartz.NET (Job scheduling and background task management)
+> ⚠️ Change credentials immediately and never expose development credentials during production deployment.
 
-**Security & API**
-    Authentication:    
-        JWT Bearer Authentication (Microsoft.AspNetCore.Authentication.JwtBearer)
-    API Documentation/UI: 
-        Scalar (Used here as an alternative to Swagger/OpenAPI UI for API exploration)
+---
 
+# 👥 User Roles
 
+## Admin
 
+Responsible for user and system management.
 
-For further informations about Features, navigate to:
-    ~ PMMS.Server > Features
+### Accessible Features
 
-For further informations about Entities, navigate to:
-    ~ PMMS.Server > Domain > Entities
+- Assignments
+- Authentication
+- Users
 
-For Entity configurations, navigate to:
-    ~ PMMS.Server > Infrastructure > Persistence > Configurations
+---
 
-To Access the sample admin account (Change credential and do not include this _info during production/deployment):
-    - open terminal
-    - navigate to PMMS.Server
-    - Run command: dotnet user-secrets list
+## Permanent User
 
+Responsible for project management and monitoring.
 
+### Accessible Features
 
+- Authentication
+- Central Project Network
+- Expirations
+- Municipalities
+- Projects
+- Project Types
 
+---
 
-## Roles:
-- Admin: Handles user management
-    **Features involved**
-        - Assignments
-        - Authentication
-        - Users
-- Permanent: Handles project management and tracking
-    **Features involved**
-        - Authentication
-        - Central Project Network
-        - Expirations
-        - Municipalities
-        - Projects
-        - Project Types
-- Temporary: Add projects as draft and save it in main project collection
-    **Features involved**
-        - Authentication
-        - Drafts
-        - Municipalities
-        - ProjectTypes
+## Temporary User
 
+Responsible for drafting project entries before publication.
 
+### Accessible Features
 
+- Authentication
+- Drafts
+- Municipalities
+- Project Types
 
+---
 
-## Features:
-**Assignments**: assign a province to permanent user
-**Authentication**: authenticate user credential and create JWT as user session
-**CentralProjectNetwork**: centralized project collection where all projects are stored
-**Drafts**: a drafting section for temporary users to add and verify projects before saving
-**Expirations**: a monitoring/tracking features that tracks the projects expirations
-**Municipalities**: fetches the seeded municipality data from database
-**Notification**: system logs that are sent to user
-**Projects**: a workspace for permanent users that are filtered based on the users current province assigned
-**ProjectTypes**: fetches the seeded project tyeps data from database
-**Users**: a user management that performs crud operation
+# 📦 System Features
 
+| Feature | Description |
+|----------|-------------|
+| Assignments | Assign provinces to permanent users |
+| Authentication | User authentication and JWT generation |
+| CentralProjectNetwork | Centralized project repository |
+| Drafts | Draft workspace for temporary users |
+| Expirations | Expiration monitoring and tracking |
+| Municipalities | Retrieves municipality master data |
+| Notifications | System-generated alerts and reports |
+| Projects | Province-filtered project workspace |
+| ProjectTypes | Retrieves project type master data |
+| Users | User management module |
 
+---
 
+# 📚 Enums
 
-## ENUMS
-Expiration Types:
-    Date of Completion
-    Extension of Time
-    Semestral Report
-    Performance Bond
+## Expiration Types
 
-Expiration Status:
-    None = 1,
-    Ongoing = 2,            // expiration is running
-    Completed = 3,          // expiraiton is completed
-    Extended = 4,           // expiration is extended
-    NearExpiration = 5,     // expiration is near expiration
-    Expired = 6,            // expiraiton is expired
-    Cancelled = 7           // expiration is cancelled
+- Date of Completion (DOC)
+- Extension of Time (EOT)
+- Semestral Report (SR)
+- Performance Bond (PB)
 
-Notification Types:
-    None = 1,
-    ProjectAddedReport = 2,
-    DailyReport = 3,
-    Alert = 4 
+---
 
-Project Setup Status:
-    None = 1,
-    Active = 2,             // an expiration has been added
-    InActive = 3,           // the project has been soft deleted 
-    NotTracked = 4,         // the project is present but the expiration is not set
+## Expiration Status
 
-Project Severities:
-    None = 1,
-    Normal = 2,             // No expired expiration
-    Warning = 3,            // 1 expiration type expired
-    Critical = 4,           // 2 Expiration type expired
-    Severe = 5              // 3 or more expiration type expired
+| Value | Status |
+|---------|---------|
+| 1 | None |
+| 2 | Ongoing |
+| 3 | Completed |
+| 4 | Extended |
+| 5 | Near Expiration |
+| 6 | Expired |
+| 7 | Cancelled |
 
-Project Statuses:
-    None = 1,
-    OnGoing = 2,            // project is running with an expiration of DOC
-    Extended  = 3,          // project is running with an expiration of EOT
-    Completed  = 4,         // project is completed: COC is given
-    FullyCompleted = 5,     // project is completed: DOD is given
-    Cancelled = 6,          // Project is cancelled within ongoing and extended status
+---
 
+## Notification Types
 
-## KEY DATAS
-**Date of Completion(DOC) Rules:**
-    - will accept user iput
-    - should not accept input less than DateIssued
-    - should not accept input if COC is given
-    - should not accept input if DOD is given
-    - base expiration for every project
-    - default project status will be ONGOING
-    - should be terminated if EOT is given
-    - should be terminated if project status is COMPLETED
+| Value | Status |
+|---------|---------|
+| 1 | None |
+| 2 | Project Added Report |
+| 3 | Daily Report |
+| 4 | Alert |
 
-**Extension of Time(EOT) Rules:**
-    - will accept user input
-    - should not accept input less than DateIssued and DOC
-    - should not accept input if COC is given
-    - should not accept input if DOD is given
-    - extends DOC
-    - accepts data if a project expiration should be extended
-    - should mark the project as EXTENDED
-    - isExtended = true
-    - should be terminated if project status is COMPLETED
+---
 
-**Semestral Report(SR) Rules:**
-    - will not accept user input
-    - calculated by system
-    - expiration per semester
-    - will calculate future expiration as long as DOD is not given
-    - renewed by user using handleSemestralReport slice
-    - should be terminated or end its expiration calculation if project status is FULLYCOMPLETED
-    - will depend on DateIssued for the semester calculation
-    - will depend on DOD for the expiration completion
+## Project Setup Status
 
-**Performance Bond(PB) Rules:**
-    - will not accept user input
-    - calculated by system
-    - expiration per year
-    - will calculate future expiration as long as COC is not given
-    - renewed by user using handlePerformanceBond slice
-    - should be terminated or end its expiration calculation if project status is COMPLETED
-    - will depend on DateIssued for the expiration calculation
-    - will depend on COC for the expiration completion
+| Value | Status |
+|---------|---------|
+| 1 | None |
+| 2 | Active |
+| 3 | Inactive |
+| 4 | Not Tracked |
 
-**Certificate of Completion(COC) Rules:**
-    - will accept user input
-    - should only accept input if DOC or EOT have data
-    - should not accept input less than DOC or EOT
-    - should mark the project as COMPLETED
+---
 
-**Deed of Donation(DOD) Rules:**
-    - will accept user input
-    - should only accept input if COC is given
-    - should not accept input less than COC
-    - should mark the project as FULLYCOMPLETED
+## Project Severities
 
+| Value | Severity |
+|---------|---------|
+| 1 | None |
+| 2 | Normal |
+| 3 | Warning |
+| 4 | Critical |
+| 5 | Severe |
 
+---
 
-## BUSINESS RULES
-**General Project Rules:**
-    - A project must belong to one municipality and one project type.
-    - A project can only be managed by users assigned to the same province as the project.
-    - Temporary users can create draft projects only; drafts must be published before becoming active projects.
-    - Deleted projects must be treated as inactive and excluded from active tracking views.
-    - Every project must follow the expiration lifecycle defined by the system.
+## Project Statuses
 
-**Project Lifecycle Rules:**
-    - A new project starts as ONGOING once its Date of Completion is set.
-    - A project becomes EXTENDED when an Extension of Time is added.
-    - A project becomes COMPLETED when a Certificate of Completion is recorded.
-    - A project becomes FULLYCOMPLETED when a Deed of Donation is recorded.
-    - A project that is COMPLETED or FULLYCOMPLETED must stop generating future expiration records that no longer apply.
+| Value | Status |
+|---------|---------|
+| 1 | None |
+| 2 | Ongoing |
+| 3 | Extended |
+| 4 | Completed |
+| 5 | Fully Completed |
+| 6 | Cancelled |
 
-**Expiration Logic Rules:**
-    - Date of Completion is the base expiration for every project.
-    - Extension of Time is only valid when the project is still active and has a valid Date of Completion.
-    - Semestral Report is system-generated every six months until the project becomes FULLYCOMPLETED.
-    - Performance Bond is system-generated every year until the project becomes COMPLETED or FULLYCOMPLETED.
-    - Expiration dates must never be earlier than the project issuance date.
-    - Expiration records must reflect the latest valid project status.
+---
 
-**Status Transition Rules:**
-    - DOC creates or maintains an ONGOING project state.
-    - EOT changes the project state to EXTENDED.
-    - COC changes the project state to COMPLETED.
-    - DOD changes the project state to FULLYCOMPLETED.
-    - Expiration processing must stop when the project reaches a terminal state.
+# 📅 Expiration Rules
 
-**Notification Rules:**
-    - The system must generate notifications for upcoming expirations.
-    - The system must generate notifications for expired records.
-    - Notifications must be tied to the affected project.
-    - Daily monitoring must run automatically at 1:00 AM.
+## Date of Completion (DOC)
+
+- Accepts user input
+- Cannot be earlier than `DateIssued`
+- Cannot be modified if COC exists
+- Cannot be modified if DOD exists
+- Base expiration for every project
+- Default status becomes **ONGOING**
+- Terminates when EOT is added
+- Terminates when project becomes COMPLETED
+
+---
+
+## Extension of Time (EOT)
+
+- Accepts user input
+- Must be later than DateIssued and DOC
+- Cannot be added if COC exists
+- Cannot be added if DOD exists
+- Extends DOC
+- Changes project status to **EXTENDED**
+- Sets `IsExtended = true`
+- Terminates when project becomes COMPLETED
+
+---
+
+## Semestral Report (SR)
+
+- System-generated
+- Generated every semester
+- Uses DateIssued as baseline
+- Continues until DOD exists
+- Renewable through `handleSemestralReport`
+- Stops when project becomes FULLYCOMPLETED
+
+---
+
+## Performance Bond (PB)
+
+- System-generated
+- Generated annually
+- Uses DateIssued as baseline
+- Continues until COC exists
+- Renewable through `handlePerformanceBond`
+- Stops when project becomes COMPLETED
+
+---
+
+## Certificate of Completion (COC)
+
+- Accepts user input
+- Requires DOC or EOT
+- Cannot be earlier than DOC/EOT
+- Changes project status to **COMPLETED**
+
+---
+
+## Deed of Donation (DOD)
+
+- Accepts user input
+- Requires COC
+- Cannot be earlier than COC
+- Changes project status to **FULLYCOMPLETED**
+
+---
+
+# 🏢 Business Rules
+
+## General Project Rules
+
+- Every project must belong to one municipality.
+- Every project must belong to one project type.
+- Users may only manage projects within their assigned province.
+- Temporary users can only create drafts.
+- Drafts must be published before becoming active projects.
+- Deleted projects are treated as inactive.
+- All projects must follow the expiration lifecycle.
+
+---
+
+## Project Lifecycle Rules
+
+- DOC → ONGOING
+- EOT → EXTENDED
+- COC → COMPLETED
+- DOD → FULLYCOMPLETED
+
+Projects in terminal states must stop generating future expiration records.
+
+---
+
+## Expiration Logic Rules
+
+- DOC is the base expiration for all projects.
+- EOT requires an active DOC.
+- SR is generated every 6 months.
+- PB is generated annually.
+- Expiration dates cannot be earlier than DateIssued.
+- Expiration records must always reflect the latest project status.
+
+---
+
+## Status Transition Rules
+
+```text
+DOC → ONGOING
+EOT → EXTENDED
+COC → COMPLETED
+DOD → FULLYCOMPLETED
+```
+
+Expiration processing stops once a project reaches its terminal state.
+
+---
+
+## Notification Rules
+
+- Generate notifications for upcoming expirations.
+- Generate notifications for expired records.
+- Link notifications to affected projects.
+- Execute monitoring automatically every day at 1:00 AM.
+
+---
+
+## 📄 License
+
+This project was developed exclusively for DHSUD-HREDRD as part of the BSIT On-the-Job Training Program at STI College Legazpi.
