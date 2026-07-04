@@ -189,7 +189,7 @@ PMMS.Server
 # User Roles
 
 ## Admin
-Responsible for user and system management.
+Responsible for user management.
 ### Accessible Features
 - Assignments
 - Authentication
