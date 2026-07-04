@@ -56,18 +56,15 @@ public sealed class GetAssignment : IEndpoint {
     {
         public async Task<AppResult<Response>> Handle(Query query, CancellationToken ct)
         {
-            // 1. Get user assignments that are not soft deleted
             var assignments = context.Assignments
                 .AsNoTracking()
                 .Include(a => a.User)
                 .Include(a => a.Province)
                 .Where(a => a.User != null && a.User.IsDeleted == false);
 
-            // 2. Filter by Province
             if (query.ProvinceId.HasValue)
                 assignments = assignments.Where(a => a.ProvinceId == query.ProvinceId);
 
-            // 3. Search by User (Username or Email)
             if (!string.IsNullOrWhiteSpace(query.Search))
             {
                 var search = query.Search.Trim().ToLower();
@@ -76,10 +73,8 @@ public sealed class GetAssignment : IEndpoint {
                     a.User.Email!.Contains(search, StringComparison.CurrentCultureIgnoreCase));
             }
 
-            // 4. Get total count of Assignments
             var totalCount = await assignments.CountAsync(ct);
 
-            // 5. Paginate and map Project to DTO
             var items = await assignments
                 .OrderBy(a => a.User!.UserName)
                 .ThenBy(a => a.Province.ProvinceName)

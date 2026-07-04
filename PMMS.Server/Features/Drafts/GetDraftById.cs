@@ -75,7 +75,6 @@ public sealed class GetDraftById : IEndpoint {
     {
         public async Task<AppResult<Response>> Handle(Query query, CancellationToken ct)
         {
-            // 1. Fetch draft with required navigation properties
             var draft = await context.Drafts
                 .AsNoTracking()
                 .Include(d => d.ProjectType)
@@ -88,7 +87,6 @@ public sealed class GetDraftById : IEndpoint {
                 return AppResult<Response>.Failure($"Draft {query.Id} was not found.", ErrorType.NotFound);
             }
 
-            // 3. Mapping
             var dto = new Dto(
                 Id: draft.Id,
                 DateIssued: draft.DateIssued,

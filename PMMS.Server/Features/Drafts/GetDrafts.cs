@@ -97,12 +97,10 @@ public sealed class GetDrafts : IEndpoint {
                 return AppResult<Response>.Failure("User identity could not be verified.", ErrorType.Unauthorized);
             }
 
-            // 1. Get Project Drafts, scoped strictly to the current user
             var drafts = context.Drafts
                 .AsNoTracking()
                 .Where(d => d.AddedById == userId && d.IsPublished == false);
 
-            // 2. Fetch data by given filter
             if (!string.IsNullOrWhiteSpace(query.Search))
             {
                 var search = query.Search.Trim().ToLower();
@@ -117,10 +115,8 @@ public sealed class GetDrafts : IEndpoint {
             if (query.ProjectTypeId.HasValue)
                 drafts = drafts.Where(d => d.ProjectTypeId == query.ProjectTypeId.Value);
 
-            // 3. Count matching filtered drafts
             var totalCount = await drafts.CountAsync(ct);
 
-            // 4. Paginate and map
             var items = await drafts
                 .OrderByDescending(d => d.CreatedAt)
                 .Skip((query.PageNumber - 1) * query.PageSize)

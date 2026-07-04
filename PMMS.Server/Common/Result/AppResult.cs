@@ -7,7 +7,6 @@ public class AppResult
     public string Error { get; }
     public ErrorType ErrorType { get; }
     
-    // Key: Field Name (e.g., "ProvinceIds"), Value: Array of error messages
     public Dictionary<string, string[]> ValidationErrors { get; }
 
     public AppResult(bool isSuccess, string error, ErrorType errorType, Dictionary<string, string[]>? validationErrors = null)
@@ -18,7 +17,6 @@ public class AppResult
         ValidationErrors = validationErrors ?? [];
     }
 
-    // Static Helpers for non-generic Result
     public static AppResult Success() => new(true, string.Empty, ErrorType.None);
     
     public static AppResult Failure(string error, ErrorType errorType = ErrorType.Failure) 

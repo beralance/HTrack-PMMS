@@ -70,7 +70,6 @@ public sealed class GetExpirationsByProjects : IEndpoint
         {
             var assignedProvinces = userContext.AssignedProvinceIds;
 
-            // 1. Fetch ALL projects belonging to the user's assigned territories
             var projectsWithExpirations = await context.Projects
                 .AsNoTracking()
                 .Where(p => p.IsDeleted == false && 

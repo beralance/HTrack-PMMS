@@ -74,15 +74,10 @@ public sealed class GetCpnProjects : IEndpoint
     {
         public async Task<AppResult<Response>> Handle(Query query, CancellationToken ct)
         {
-            // 1. Base Query: Global scope (No userContext assignment filter)
-            // Still enforcing active tracking and non-soft-deleted guards
             var queryable = context.Projects
                 .AsNoTracking()
                 .Where(p => !p.IsDeleted && p.SetupStatus == ProjectSetupStatuses.Active);
 
-            // 2. Heavy Filtering Suite
-            
-            // Text Search (Database-driven case-insensitive handling)
             if (!string.IsNullOrWhiteSpace(query.Search))
             {
                 var search = query.Search.Trim();
@@ -92,7 +87,6 @@ public sealed class GetCpnProjects : IEndpoint
                     EF.Functions.Like(p.LsNo, $"%{search}%"));
             }
 
-            // Geographic Filters
             if (query.ProvinceId.HasValue)
             {
                 queryable = queryable.Where(p => p.Municipality.ProvinceId == query.ProvinceId.Value);
@@ -103,7 +97,6 @@ public sealed class GetCpnProjects : IEndpoint
                 queryable = queryable.Where(p => p.MunicipalityId == query.MunicipalityId.Value);
             }
 
-            // Classification Filters
             if (query.ProjectTypeId.HasValue)
             {
                 queryable = queryable.Where(p => p.ProjectTypeId == query.ProjectTypeId.Value);
@@ -114,10 +107,8 @@ public sealed class GetCpnProjects : IEndpoint
                 queryable = queryable.Where(p => p.Status == query.Status.Value);
             }
 
-            // 3. Get Total Count before pagination
             var totalCount = await queryable.CountAsync(ct);
 
-            // 4. Pagination, Sorting, and Efficient Projections
             var items = await queryable
                 .OrderByDescending(p => p.DateIssued)
                 .Skip((query.Page - 1) * query.PageSize)

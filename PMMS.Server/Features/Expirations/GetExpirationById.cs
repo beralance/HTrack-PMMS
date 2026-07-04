@@ -72,7 +72,6 @@ public sealed class GetExpirationById : IEndpoint
     {
         public async Task<AppResult<Response>> Handle(Query query, CancellationToken ct)
         {
-            // 1. Fetch record in a single optimized pass, enforcing security parameters immediately
             var expiration = await context.Expirations
                 .AsNoTracking()
                 .Where(e => e.Id == query.ExpirationId && 
@@ -101,10 +100,8 @@ public sealed class GetExpirationById : IEndpoint
                 ))
                 .FirstOrDefaultAsync(ct);
 
-            // 2. If nothing returned, evaluate exactly why the access failed
             if (expiration is null)
             {
-                // Verify if the expiration record exists at all in the database
                 bool expirationExistsAtAll = await context.Expirations
                     .AnyAsync(e => e.Id == query.ExpirationId && e.IsActive && e.Project != null && !e.Project.IsDeleted, ct);
 

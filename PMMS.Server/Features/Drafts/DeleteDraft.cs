@@ -45,7 +45,6 @@ public sealed class DeleteDraft : IEndpoint {
         {
             var userId = userContext.UserId;
 
-            // 1. Fetch draft and include Municipality for regional security check
             var draft = await context.Drafts
                 .Include(d => d.Municipality)
                 .FirstOrDefaultAsync(d => d.Id == command.Id && d.IsPublished == false, ct);
@@ -55,7 +54,6 @@ public sealed class DeleteDraft : IEndpoint {
                 return AppResult<Response>.Failure($"Draft {command.Id} was not found or has already been published.", ErrorType.NotFound);
             }
 
-            // 2. Security Check: Ensure user is authorized to delete this
             bool isOwner = draft.AddedById == userId;
 
             if (!isOwner)
@@ -63,7 +61,6 @@ public sealed class DeleteDraft : IEndpoint {
                 return AppResult<Response>.Failure("You do not have permission to delete this draft.", ErrorType.Forbidden);
             }
                 
-            // 3. Hard delete
             context.Drafts.Remove(draft);
             await context.SaveChangesAsync(ct);
 

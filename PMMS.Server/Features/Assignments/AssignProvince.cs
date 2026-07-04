@@ -66,14 +66,12 @@ public sealed class AssignProvince : IEndpoint {
     {
         public async Task<AppResult<Response>> Handle(Command command, CancellationToken ct)
         {
-            // 1. Verify if user exists and is not soft deleted
             var user = await userManager.FindByIdAsync(command.UserId);
             if (user == null || user.IsDeleted == true)
             {
                 return AppResult<Response>.Failure("User does not exist.", ErrorType.NotFound);
             }
 
-            // 2. Check if given user has a permanent role. Only permanent user can be assigned to a province
             var roles = await userManager.GetRolesAsync(user);
             if (!roles.Contains(UserRoles.Permanent))
             {
@@ -81,7 +79,6 @@ public sealed class AssignProvince : IEndpoint {
                     $"User {user.UserName} is not a Permanent employee. Only permanent staff require regional assignments.");
             }
 
-            // 3. Verify all ProvinceIds actually exist in the database
             var validProvinceCount = await context.Provinces
                 .CountAsync(p => command.ProvinceIds.Contains(p.Id), ct);
 
@@ -90,7 +87,6 @@ public sealed class AssignProvince : IEndpoint {
                 return AppResult<Response>.Failure("One or more provided Province IDs are invalid.");
             }
 
-            // 4. Clear existing assignment and Add new
             var existingAssignments = await context.Assignments
                 .Where(a => a.UserId == command.UserId)
                 .ToListAsync(ct);

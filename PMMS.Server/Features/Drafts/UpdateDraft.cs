@@ -100,7 +100,6 @@ public sealed class UpdateDraft : IEndpoint {
             if (userId is null)
                 return AppResult<Response>.Failure("Unauthorized.", ErrorType.Unauthorized);
 
-            // 1. Fetch only the user's own unpublished draft
             var draft = await context.Drafts
                 .FirstOrDefaultAsync(d => d.Id == command.Id && 
                                         d.IsPublished == false && 
@@ -111,7 +110,6 @@ public sealed class UpdateDraft : IEndpoint {
                 return AppResult<Response>.Failure($"Draft {command.Id} was not found or access denied.", ErrorType.NotFound);
             }
 
-            // 2. Check for Name Collision (excluding self)
             var nameNormalized = command.ProjectName.Trim().ToLower();
             var exists = await context.Drafts
                 .AnyAsync(d => d.ProjectName.ToLower() == nameNormalized && 
@@ -123,7 +121,6 @@ public sealed class UpdateDraft : IEndpoint {
                 return AppResult<Response>.Failure($"A draft named '{command.ProjectName}' already exists.", ErrorType.Conflict);
             }
 
-            // 3. Update data (Manual mapping is safer and more performant than per-request Mapster config)
             draft.DateIssued = command.DateIssued;
             draft.ProjectName = command.ProjectName.Trim();
             draft.Developer = command.Developer.Trim();

@@ -48,26 +48,21 @@ public sealed class DeleteNotification : IEndpoint
     {
         public async Task<AppResult<Response>> Handle(Command command, CancellationToken ct)
         {
-            // Get current user
             var currentUserId = userContext.UserId;
             
-            // Fetch notification based on given Id
             var notification = await context.Notifications
                 .FirstOrDefaultAsync(n => n.Id == command.Id, ct);
 
-            // Check if notification was found, return null if not
             if (notification is null)
             {
                 return AppResult<Response>.Failure($"Notification {command.Id} was not found.", ErrorType.NotFound);
             }
 
-            // Check if current user is the owner of the notification 
             if (notification.UserId != currentUserId)
             {
                 return AppResult<Response>.Failure("You do not have permission to alter this record.", ErrorType.Forbidden);
             }
 
-            // Update dates
             notification.IsDeleted = true;
             notification.DeletedAt = DateTimeOffset.UtcNow;
             notification.DeletedById = currentUserId;

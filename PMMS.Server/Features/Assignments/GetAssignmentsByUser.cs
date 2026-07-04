@@ -52,19 +52,16 @@ public sealed class GetAssignmentByUser : IEndpoint {
     {
         public async Task<AppResult<Response>> Handle(Query query, CancellationToken ct)
         {
-            // 1. Fetch User based on the given Id and get its info
             var user = await context.Users
                 .AsNoTracking()
                 .Select(u => new { u.Id, u.UserName, u.Email, u.IsDeleted })
                 .FirstOrDefaultAsync(u => u.Id == query.UserId, ct);
 
-            // 2. Verify if there is a User or if its soft deleted
             if (user == null || user.IsDeleted == true)
             {
                 return AppResult<Response>.Failure($"User {query.UserId} was not found.", ErrorType.NotFound);
             }
 
-            // 3. Map to DTO
             var assignments = await context.Assignments
                 .AsNoTracking()
                 .Where(a => a.UserId == query.UserId)

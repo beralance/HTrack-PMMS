@@ -36,8 +36,8 @@ public sealed class CreateUser : IEndpoint {
             RuleFor(x => x.Email)
                 .NotEmpty()
                 .EmailAddress()
-                .Must(email => email.EndsWith("@dhsud.hredrd.rv", StringComparison.OrdinalIgnoreCase))
-                .WithMessage("Only official DHSUD-HREDRD emails are permitted.");
+                .Must(email => email.EndsWith("@sample.com", StringComparison.OrdinalIgnoreCase))
+                .WithMessage("Only official emails are permitted.");
 
             RuleFor(x => x.Password)
                 .NotEmpty()
@@ -94,29 +94,24 @@ public sealed class CreateUser : IEndpoint {
     {
         public async Task<AppResult<Response>> Handle(Command command, CancellationToken ct)
         {
-            // Normalize role to system constants
             var normalizedRole = NormalizeRole(command.Role);
 
-            // Conflict check
             var existing = await userManager.FindByEmailAsync(command.Email);
             if (existing is not null)
             {
                 return AppResult<Response>.Failure("User alrady existed.", ErrorType.Conflict);   
             }
 
-            // Ensure role exists in Identity store
             var roleExists = await roleManager.RoleExistsAsync(normalizedRole);
             if (!roleExists)
             {
                 return AppResult<Response>.Failure("Role doesnt exist.", ErrorType.NotFound);   
             }
 
-            // Business rule: permanent users must have at least one assignment
             var provinceIds = (command.AssignedProvinceIds ?? [])
                 .Distinct()
                 .ToList();
 
-            // Check if Temporary user and prevent Assignment if true
             if (command.Role.Equals("Temporary", StringComparison.OrdinalIgnoreCase)
                 && command.AssignedProvinceIds?.Any() == true)
             {
@@ -128,7 +123,6 @@ public sealed class CreateUser : IEndpoint {
                 return AppResult<Response>.Failure("Permanent users must have at least one province assignment.");   
             }
 
-            // Province ids must exist
             if (provinceIds.Count != 0)
             {
                 var validProvinceIds = await context.Provinces
@@ -154,7 +148,6 @@ public sealed class CreateUser : IEndpoint {
             var createResult = await userManager.CreateAsync(user, command.Password);
             if (!createResult.Succeeded)
             {
-                // Convert Identity creation failures into validation-style error
                 var errorMessage = string.Join("; ", createResult.Errors.Select(e => e.Description));
                 return AppResult<Response>.Failure(
                     errorMessage,

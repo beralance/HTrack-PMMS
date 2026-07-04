@@ -9,7 +9,6 @@ using PMMS.Server.Common.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Services Configuration
 builder.Services.AddIdentityServices(builder.Configuration);
 builder.Services.AddInfrastructure(builder.Configuration);
 
@@ -39,7 +38,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("ApiCorsPolicy", policy =>
     {
-        policy.WithOrigins("http://localhost:5173") // Update with your frontend production URL later
+        policy.WithOrigins("http://localhost:****") 
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -50,7 +49,6 @@ var app = builder.Build();
 app.UsePathBase("/api/v1");
 app.UseExceptionHandler();
 
-// Development Tools
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -61,7 +59,6 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-// Database Seeding
 using (var scope = app.Services.CreateScope())
 {
     var seeder = scope.ServiceProvider.GetRequiredService<PmmsDbSeeder>();
@@ -73,7 +70,6 @@ using (var scope = app.Services.CreateScope())
     );
 }
 
-// Middleware & Endpoints
 app.UseCors("ApiCorsPolicy");
 app.UseAuthentication();
 app.UseAuthorization();

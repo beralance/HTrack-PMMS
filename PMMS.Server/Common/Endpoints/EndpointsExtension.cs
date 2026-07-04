@@ -5,7 +5,6 @@ namespace PMMS.Server.Common.Endpoints
 {
     public static class EndpointExtensions
     {
-        // 1. Find and register all IEndpoint classes in Dependency Injection
         public static IServiceCollection AddEndpoints(this IServiceCollection services, Assembly assembly)
         {
             var serviceDescriptors = assembly.GetTypes()
@@ -16,7 +15,6 @@ namespace PMMS.Server.Common.Endpoints
             return services;
         }
 
-        // 2. Map all registered IEndpoints to the WebApplication
         public static IApplicationBuilder MapEndpoints(this WebApplication app)
         {
             var endpoints = app.Services.GetRequiredService<IEnumerable<IEndpoint>>();

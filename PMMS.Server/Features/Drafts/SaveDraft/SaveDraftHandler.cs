@@ -20,7 +20,6 @@ public sealed class SaveDraftHandler(
         if (userId == null) 
             return AppResult<SaveDraftResponse>.Failure("Unauthorized.", ErrorType.Unauthorized);
 
-        // 1. Fetch draft with required navigation
         var draft = await context.Drafts
             .Include(d => d.Municipality)
             .FirstOrDefaultAsync(d => d.Id == command.Id && d.AddedById == userId && d.IsPublished == false, ct);
@@ -28,18 +27,16 @@ public sealed class SaveDraftHandler(
         if (draft == null) 
             return AppResult<SaveDraftResponse>.Failure("Draft not found.", ErrorType.NotFound);
 
-        // 2. Begin Atomic Transaction
         await using var transaction = await context.Database.BeginTransactionAsync(ct);
         try
         {
             var now = DateTimeOffset.UtcNow;
             var status = SaveDraftBehavior.DetermineProjectStatus(draft);
+
             Console.WriteLine($"Status: {status}");
-            // 3. Promote to Project
             var project = SaveDraftBehavior.MapProject(draft, status, userId, now);
             context.Projects.Add(project);
 
-            // 4. Initialize Lifecycle Ledger (Using standard signature)
             var expirations = CreateExpirationBehavior.CalculateExpirations(
                 project,
                 status,
@@ -49,7 +46,6 @@ public sealed class SaveDraftHandler(
 
             context.Expirations.AddRange(expirations);
 
-            // 5. Finalize Draft State
             draft.IsPublished = true;
             draft.PublishedAt = now;
             draft.PublishedById = userId;
@@ -57,7 +53,6 @@ public sealed class SaveDraftHandler(
             await context.SaveChangesAsync(ct);
             await transaction.CommitAsync(ct);
 
-            // 6. Notify downstream systems
             await mediator.Publish(new DraftCreatedEvent(project.Id, project.Municipality.ProvinceId, userId), ct);
 
             return AppResult<SaveDraftResponse>.Success(new SaveDraftResponse(

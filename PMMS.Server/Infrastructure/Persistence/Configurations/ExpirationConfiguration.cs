@@ -40,7 +40,6 @@ public class ExpirationConfiguration : IEntityTypeConfiguration<Expiration>
         builder.Property(e => e.IsActive) 
             .HasDefaultValue(true);
     
-        // Delete expirations related to a Project
         builder.HasOne(e => e.Project)
             .WithMany()
             .HasForeignKey(e => e.ProjectId)

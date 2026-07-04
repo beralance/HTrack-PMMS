@@ -89,7 +89,6 @@ public sealed class CreateDraft : IEndpoint{
             if (userId is null)
                 return AppResult<Response>.Failure("User context is missing.", ErrorType.Unauthorized);
 
-            // 2. Atomic Collision Check: Search both tables in a single operation
             var nameNormalized = command.ProjectName.Trim().ToLower();
             
             var existsInDrafts = await context.Drafts
@@ -103,13 +102,11 @@ public sealed class CreateDraft : IEndpoint{
                 return AppResult<Response>.Failure($"A project or draft named '{command.ProjectName}' already exists.", ErrorType.Conflict);
             }
 
-            // 3. Date Integrity Logic
             if (command.DodDate.HasValue && command.DodDate.Value < command.DateIssued)
             {
                 return AppResult<Response>.Failure("DOD date cannot precede the Date Issued.", ErrorType.Validation);
             }
 
-            // 4. Map to Draft Entity
             var draft = new Domain.Entities.Draft
             {
                 DateIssued = command.DateIssued,

@@ -87,14 +87,11 @@ public sealed class GetUsers : IEndpoint {
     {
         public async Task<AppResult<Response>> Handle(Query query, CancellationToken ct)
         {
-            // 1. Build the base query
             var usersQuery = userManager.Users.AsNoTracking();
 
-            // 2. Soft-delete filter
             if (!query.IncludeDeleted)
                 usersQuery = usersQuery.Where(u => u.IsDeleted == false);
 
-            // 3. Search filter
             if (!string.IsNullOrWhiteSpace(query.Search))
             {
                 var search = query.Search.Trim().ToLower();
@@ -104,10 +101,8 @@ public sealed class GetUsers : IEndpoint {
                 );
             }
 
-            // 4. Role Filter
             if (!string.IsNullOrWhiteSpace(query.Role))
             {
-                // Join with IdentityUserRole and IdentityRole
                 usersQuery = from user in usersQuery
                             join userRole in context.UserRoles on user.Id equals userRole.UserId
                             join role in context.Roles on userRole.RoleId equals role.Id
@@ -115,10 +110,8 @@ public sealed class GetUsers : IEndpoint {
                             select user;
             }
 
-            // 5. Get Total Count after filters but before pagination
             var totalCount = await usersQuery.CountAsync(ct);
 
-            // 6. Execute Pagination and get Users
             var users = await usersQuery
                 .OrderBy(u => u.UserName)
                 .Skip((query.Page - 1) * query.PageSize)
@@ -127,7 +120,6 @@ public sealed class GetUsers : IEndpoint {
 
             var userIds = users.Select(u => u.Id).ToList();
 
-            // 7. Batch Fetch Assignments (Professional - No N+1)
             var assignments = await context.Assignments
                 .AsNoTracking()
                 .Where(a => a.UserId != null && userIds.Contains(a.UserId))
@@ -137,7 +129,6 @@ public sealed class GetUsers : IEndpoint {
                 .GroupBy(x => x.UserId!)
                 .ToDictionary(g => g.Key, g => g.Select(x => x.ProvinceId).ToList());
 
-            // 8. Batch Fetch Roles (Professional - No N+1)
             var userRoles = await (from ur in context.UserRoles
                                 join r in context.Roles on ur.RoleId equals r.Id
                                 where userIds.Contains(ur.UserId)
@@ -148,7 +139,6 @@ public sealed class GetUsers : IEndpoint {
                 .GroupBy(x => x.UserId)
                 .ToDictionary(g => g.Key, g => g.Select(x => x.Name!).ToList());
 
-            // 9. Map to DTO
             var items = users.Select(user => new Dto(
                 Id: user.Id,
                 Email: user.Email ?? string.Empty,

@@ -66,7 +66,6 @@ public sealed class AddDeedOfDonation : IEndpoint
         {
             var userId = userContext.UserId;
 
-            // 1. Fetch project with location context to evaluate data isolation boundaries
             var project = await context.Projects
                 .Include(p => p.Municipality)
                 .FirstOrDefaultAsync(p => p.Id == command.ProjectId, ct);
@@ -76,7 +75,6 @@ public sealed class AddDeedOfDonation : IEndpoint
                 return AppResult<Response>.Failure($"Project {command.ProjectId} was not found.", ErrorType.NotFound);
             }
 
-            // 2. Enforce regional territory authorization boundaries
             if (!userContext.AssignedProvinceIds.Contains(project.Municipality.ProvinceId))
             {
                 return AppResult<Response>.Failure(
@@ -84,7 +82,6 @@ public sealed class AddDeedOfDonation : IEndpoint
                     ErrorType.Forbidden);
             }
 
-            // 3. Workflow Pre-Condition Validations
             if (project.HasCoc == false)
             {   
                 return AppResult<Response>.Failure($"Project '{project.ProjectName}' must possess a verified Certificate of Completion before processing a Deed of Donation.", ErrorType.Conflict);
@@ -100,7 +97,6 @@ public sealed class AddDeedOfDonation : IEndpoint
                 return AppResult<Response>.Failure($"The Deed of Donation date ({command.DodDate}) cannot be earlier than the Certificate of Completion date ({project.CocDate}).", ErrorType.Conflict);
             }
 
-            // 4. Mutate Parent Project State to terminal completion
             var now = DateTimeOffset.UtcNow;
             project.DodDate = command.DodDate;
             project.HasDod = true;
@@ -109,13 +105,11 @@ public sealed class AddDeedOfDonation : IEndpoint
             project.ModifiedById = userId ?? string.Empty;
             project.UpdatedAt = now;
 
-            // 5. Fetch the active background recurring ledger timeline profile
             var expiration = await context.Expirations
                 .FirstOrDefaultAsync(e => e.ProjectId == project.Id && 
                                           e.Type == ExpirationTypes.SemestralReport && 
                                           e.Status == ExpirationStatuses.Ongoing, ct);
             
-            // 6. Conclude background processing dependencies if present
             if (expiration is not null)
             {
                 expiration.Status = ExpirationStatuses.Completed;

@@ -12,7 +12,6 @@ public class Handler(PmmsDbContext context) : IRequestHandler<AddExpirationComma
 {
     public async Task<AppResult<AddExpirationResponse>> Handle(AddExpirationCommand command, CancellationToken ct)
     {
-        // 1. Verify project exists
         var project = await context.Projects.FindAsync([command.ProjectId], ct);
 
         if (project is null)
@@ -20,7 +19,6 @@ public class Handler(PmmsDbContext context) : IRequestHandler<AddExpirationComma
             return AppResult<AddExpirationResponse>.Failure($"Project {command.ProjectId} does not exist.", ErrorType.NotFound);
         }
 
-        // 2. Prevent re-activation if project already has active expiration trackings
         if (await context.Expirations.AnyAsync(p => p.ProjectId == command.ProjectId, ct) 
             && project.SetupStatus == ProjectSetupStatuses.Active)
         {
@@ -31,7 +29,6 @@ public class Handler(PmmsDbContext context) : IRequestHandler<AddExpirationComma
         }
 
 
-        // 3. Determine initial project status based on incoming completion flags
         var projectStatus = command switch
         {
             { HasCoc: true, HasDod: true } => ProjectStatuses.FullyCompleted,
@@ -40,7 +37,6 @@ public class Handler(PmmsDbContext context) : IRequestHandler<AddExpirationComma
             _ => ProjectStatuses.OnGoing
         };
 
-        // 4. Update core project setup state and status parameters
         project.CocDate = command.CocDate;
         project.HasCoc = command.HasCoc;
         project.DodDate = command.DodDate;
@@ -49,7 +45,6 @@ public class Handler(PmmsDbContext context) : IRequestHandler<AddExpirationComma
         project.Status = projectStatus;
         project.SetupStatus = ProjectSetupStatuses.Active;
 
-        // 5. Compute the initial set of timeline expirations and milestones
         var expirations = CreateExpirationBehavior.CalculateExpirations(
             project,
             projectStatus,
@@ -57,7 +52,6 @@ public class Handler(PmmsDbContext context) : IRequestHandler<AddExpirationComma
             command.ExtensionOfTime
         );
 
-        // 6. Persist project changes and milestone data to the database
         await context.Expirations.AddRangeAsync(expirations, ct);
         await context.SaveChangesAsync(ct);
 

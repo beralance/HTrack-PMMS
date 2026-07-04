@@ -1,26 +1,112 @@
 # Project Monitoring and Management System (PMMS)
 
-> An On-the-Job Training (OJT) project developed for DHSUD-HREDRD as part of the BSIT OJT requirements at STI College Legazpi.
+An On-the-Job Training (OJT) project developed for DHSUD-HREDRD as part of the BSIT OJT requirements at STI College Legazpi.
 
 ---
 
-## 📌 Overview
+## What is the project?
+PMMS is a centralized web-based platform developed for the Department of Human Settlements and Urban Development (DHSUD) – Housing and Real Estate Development Regulation Division (HREDRD) during my internship.
 
-The **Project Monitoring and Management System (PMMS)** is a centralized project storage and monitoring platform designed for **DHSUD-HREDRD**.
+The system was designed to reduce the administrative workload involved in monitoring government projects by replacing manual, paper-based processes with a centralized digital platform. It provides project management, automated expiration monitoring, role-based access control, and project tracking to improve operational efficiency and data accessibility.
 
-The system provides project tracking, expiration monitoring, automated notifications, and role-based access control.
-
-### Main Objectives
-
-- Reduce manual project tracking workload
-- Organize workflows and responsibilities
-- Minimize human errors
-- Centralize project records and documentation
-- Automate expiration monitoring and reporting
+As the primary backend developer, I designed and implemented the application's backend architecture, REST APIs, authentication and authorization, database design, and automated background processing. The project was originally intended to be developed as a full-stack application within the internship period.
 
 ---
 
-## 🚀 Key Features
+## The Problem
+Prior to PMMS, the HREDRD division managed projects using a combination of spreadsheets and physical documents. While this approach allowed project information to be stored digitally, monitoring and managing projects remained largely manual and time-consuming.
+
+One of the biggest challenges was expiration monitoring. Staff had to manually inspect spreadsheet records and compare project dates to determine which projects were nearing expiration or had already expired. As the number of projects grew, this process became increasingly difficult and prone to oversight.
+
+The existing workflow also introduced several operational challenges:
+
+- **Human Error** – Spreadsheet cells could be modified freely, making records susceptible to typographical mistakes and inconsistent data.
+- **Fragmented Information** – Project records were split between physical documents and spreadsheets, making information difficult to organize and maintain.
+- **Limited Collaboration** – Staff relied on general-purpose productivity tools rather than a system designed specifically for their workflow, resulting in disconnected processes.
+- **Lack of Workflow Integration** – Project monitoring, reporting, and record management required switching between multiple tools instead of working within a single, centralized environment.
+- **Administrative Overhead** – Maintaining project records digitally was only one part of the overall workflow, adding to the division's operational workload.
+
+These challenges highlighted the need for a dedicated project management platform that could centralize project information, automate repetitive monitoring tasks, and support the division's day-to-day operations through a workflow tailored to their specific business processes.
+
+---
+
+## Technical Highlights
+
+- **Workflow-Driven Design** – Built the system around the division's existing workflow, allowing staff to transition from manual processes without changing how they work.
+- **Automatic Expiration Tracking** – A single project entry automatically calculates and stores all applicable expiration schedules, enabling continuous project monitoring.
+- **Automated Background Monitoring** – The system checks project expirations every day and automatically performs monitoring tasks without user intervention.
+- **Permission-Based Notifications** – Notifications are only sent to users responsible for the affected project's assigned province, ensuring relevant updates reach the right personnel.
+- **Draft Approval Workflow** – Internship personnel can only create draft projects, which must be reviewed before becoming part of the main project repository.
+- **Centralized Project Repository** – All projects are stored in one centralized system, giving authorized users a complete and organized view of project information.
+- **Role-Oriented Workspaces** – Each user is provided with a workspace tailored to their assigned responsibilities, reducing unnecessary information and improving focus.
+- **Project Severity Classification** – Projects are automatically categorized by expiration status, helping users quickly identify records that require immediate attention.
+- **Scalable Backend Architecture** – Built using a modular, feature-based architecture to simplify maintenance and support future expansion.
+
+---
+
+## My Contributions
+
+As the primary backend developer, I was responsible for designing and implementing the backend of the Project Monitoring and Management System (PMMS). I analyzed business requirements, designed the system architecture, and translated manual workflows into a scalable and maintainable software solution.
+
+### My Responsibilities
+
+- **Designed the Backend Architecture** – Planned the overall system structure, feature organization, and project architecture with scalability, maintainability, and future development in mind.
+
+- **Designed the Database** – Created the relational database structure and relationships to support project management, expiration monitoring, notifications, and user permissions.
+
+- **Translated Business Workflows into Software** – Worked closely with the division's requirements to digitize existing processes without disrupting their established workflow.
+
+- **Engineered the Expiration System** – Designed the logic that automatically calculates and stores project expiration schedules from a single project entry, providing the foundation for automated monitoring and notifications.
+
+- **Built Automated Monitoring** – Implemented scheduled background processes that continuously monitor project expirations and generate notifications for the appropriate users.
+
+- **Designed Permission-Based Workflows** – Implemented role-based authorization, dedicated workspaces, draft approval, and permission-based notifications to ensure users only interact with information relevant to their responsibilities.
+
+- **Developed Flexible Business Logic** – Designed the project workflow to support multiple project states and independent expiration lifecycles through a single project entry process.
+
+- **Engineered for Maintainability** – Organized the project using a modular architecture that simplifies future maintenance, feature expansion, and onboarding for new developers.
+
+- **Performed Continuous Testing** – Regularly tested features throughout development to validate business rules, verify expected behavior, and identify potential edge cases before deployment.
+
+- **Selected the Technology Stack** – Evaluated and integrated technologies that best matched the project's functional requirements, scalability goals, and long-term maintainability.
+
+---
+
+## Key Engineering Decisions
+
+Throughout the development of PMMS, I focused on building a solution that aligned with the division's existing workflow while remaining scalable, maintainable, and practical for long-term use.
+
+### Preserve the Existing Workflow
+
+Instead of forcing users to adapt to a completely new process, the system was designed around the division's current workflow. This reduced the learning curve and allowed staff to transition naturally from manual operations to a digital environment.
+
+### Design Around Business Rules
+
+Rather than building generic CRUD operations, the system was designed to reflect the division's actual business processes. Project states, expiration lifecycles, notifications, permissions, and approvals were implemented according to real operational requirements.
+
+### Automate Repetitive Tasks
+
+Recurring administrative work such as expiration monitoring and notification generation was automated through scheduled background processing, allowing users to focus on project management instead of repetitive manual tasks.
+
+### Keep User Responsibilities Separate
+
+Different users perform different responsibilities within the division. The system provides dedicated workspaces, permissions, and access restrictions so each user only interacts with information and features relevant to their role.
+
+### Build for Future Developers
+
+The backend was structured using a modular architecture with clear separation of concerns to simplify maintenance, encourage scalability, and make future development easier.
+
+### Validate Business Logic Continuously
+
+Development was driven by continuous testing and validation to ensure that business rules behaved as expected across different project scenarios. Particular attention was given to edge cases and logical consistency rather than simply producing functional output.
+
+### Prioritize Practical Solutions
+
+Every major feature was evaluated not only from a technical perspective but also from an operational one. The goal was to deliver solutions that improved the division's daily workflow while remaining realistic, maintainable, and easy to adopt.
+
+---
+
+## Key Features
 
 - Centralized project repository
 - Project expiration tracking
@@ -28,46 +114,10 @@ The system provides project tracking, expiration monitoring, automated notificat
 - Daily monitoring and reporting
 - Role-based access control
 - Draft management for temporary users
-- Province-based project access restrictions
+- Regional access restrictions
 - Automatic expiration status updates
 
-### Expiration Monitoring
-
-The system monitors project expirations and:
-
-- Detects projects nearing expiration (within 2 months)
-- Sends daily notifications for upcoming expirations
-- Tracks expired projects
-- Generates automatic logs and reports
-- Runs scheduled monitoring every day at **1:00 AM**
-
----
-
-## 📋 Project Information
-
-| Item | Value |
-|--------|--------|
-| Version | V0.1 |
-| Development Duration | 2 Months |
-| V1 Completion Date | June 9, 2026 |
-
----
-
-## ⚠️ Current Status
-
-The server is currently running on **Version 1 (V1)**.
-
-Further updates, enhancements, and testing are required, including:
-
-- Feature improvements
-- Bug fixes
-- Stress testing
-- Intentional failure testing to identify system weaknesses
-- Performance optimization
-
----
-
-# 🛠 Technology Stack
+# Technology Stack
 
 ## Core Framework
 
@@ -108,7 +158,7 @@ Further updates, enhancements, and testing are required, including:
 
 ---
 
-# 📂 Project Structure
+# Project Structure
 
 ### Features
 
@@ -136,27 +186,11 @@ PMMS.Server
 
 ---
 
-# 🔐 Sample Admin Account
-
-For development purposes only:
-
-```bash
-cd PMMS.Server
-dotnet user-secrets list
-```
-
-> ⚠️ Change credentials immediately and never expose development credentials during production deployment.
-
----
-
-# 👥 User Roles
+# User Roles
 
 ## Admin
-
 Responsible for user and system management.
-
 ### Accessible Features
-
 - Assignments
 - Authentication
 - Users
@@ -164,11 +198,8 @@ Responsible for user and system management.
 ---
 
 ## Permanent User
-
 Responsible for project management and monitoring.
-
 ### Accessible Features
-
 - Authentication
 - Central Project Network
 - Expirations
@@ -179,11 +210,8 @@ Responsible for project management and monitoring.
 ---
 
 ## Temporary User
-
 Responsible for drafting project entries before publication.
-
 ### Accessible Features
-
 - Authentication
 - Drafts
 - Municipalities
@@ -191,221 +219,10 @@ Responsible for drafting project entries before publication.
 
 ---
 
-# 📦 System Features
-
-| Feature | Description |
-|----------|-------------|
-| Assignments | Assign provinces to permanent users |
-| Authentication | User authentication and JWT generation |
-| CentralProjectNetwork | Centralized project repository |
-| Drafts | Draft workspace for temporary users |
-| Expirations | Expiration monitoring and tracking |
-| Municipalities | Retrieves municipality master data |
-| Notifications | System-generated alerts and reports |
-| Projects | Province-filtered project workspace |
-| ProjectTypes | Retrieves project type master data |
-| Users | User management module |
+## Why This Project Matters
+PMMS was built to solve real operational challenges within a government division by digitizing existing workflows while minimizing disruption to daily operations.
 
 ---
 
-# 📚 Enums
-
-## Expiration Types
-
-- Date of Completion (DOC)
-- Extension of Time (EOT)
-- Semestral Report (SR)
-- Performance Bond (PB)
-
----
-
-## Expiration Status
-
-| Value | Status |
-|---------|---------|
-| 1 | None |
-| 2 | Ongoing |
-| 3 | Completed |
-| 4 | Extended |
-| 5 | Near Expiration |
-| 6 | Expired |
-| 7 | Cancelled |
-
----
-
-## Notification Types
-
-| Value | Status |
-|---------|---------|
-| 1 | None |
-| 2 | Project Added Report |
-| 3 | Daily Report |
-| 4 | Alert |
-
----
-
-## Project Setup Status
-
-| Value | Status |
-|---------|---------|
-| 1 | None |
-| 2 | Active |
-| 3 | Inactive |
-| 4 | Not Tracked |
-
----
-
-## Project Severities
-
-| Value | Severity |
-|---------|---------|
-| 1 | None |
-| 2 | Normal |
-| 3 | Warning |
-| 4 | Critical |
-| 5 | Severe |
-
----
-
-## Project Statuses
-
-| Value | Status |
-|---------|---------|
-| 1 | None |
-| 2 | Ongoing |
-| 3 | Extended |
-| 4 | Completed |
-| 5 | Fully Completed |
-| 6 | Cancelled |
-
----
-
-# 📅 Expiration Rules
-
-## Date of Completion (DOC)
-
-- Accepts user input
-- Cannot be earlier than `DateIssued`
-- Cannot be modified if COC exists
-- Cannot be modified if DOD exists
-- Base expiration for every project
-- Default status becomes **ONGOING**
-- Terminates when EOT is added
-- Terminates when project becomes COMPLETED
-
----
-
-## Extension of Time (EOT)
-
-- Accepts user input
-- Must be later than DateIssued and DOC
-- Cannot be added if COC exists
-- Cannot be added if DOD exists
-- Extends DOC
-- Changes project status to **EXTENDED**
-- Sets `IsExtended = true`
-- Terminates when project becomes COMPLETED
-
----
-
-## Semestral Report (SR)
-
-- System-generated
-- Generated every semester
-- Uses DateIssued as baseline
-- Continues until DOD exists
-- Renewable through `handleSemestralReport`
-- Stops when project becomes FULLYCOMPLETED
-
----
-
-## Performance Bond (PB)
-
-- System-generated
-- Generated annually
-- Uses DateIssued as baseline
-- Continues until COC exists
-- Renewable through `handlePerformanceBond`
-- Stops when project becomes COMPLETED
-
----
-
-## Certificate of Completion (COC)
-
-- Accepts user input
-- Requires DOC or EOT
-- Cannot be earlier than DOC/EOT
-- Changes project status to **COMPLETED**
-
----
-
-## Deed of Donation (DOD)
-
-- Accepts user input
-- Requires COC
-- Cannot be earlier than COC
-- Changes project status to **FULLYCOMPLETED**
-
----
-
-# 🏢 Business Rules
-
-## General Project Rules
-
-- Every project must belong to one municipality.
-- Every project must belong to one project type.
-- Users may only manage projects within their assigned province.
-- Temporary users can only create drafts.
-- Drafts must be published before becoming active projects.
-- Deleted projects are treated as inactive.
-- All projects must follow the expiration lifecycle.
-
----
-
-## Project Lifecycle Rules
-
-- DOC → ONGOING
-- EOT → EXTENDED
-- COC → COMPLETED
-- DOD → FULLYCOMPLETED
-
-Projects in terminal states must stop generating future expiration records.
-
----
-
-## Expiration Logic Rules
-
-- DOC is the base expiration for all projects.
-- EOT requires an active DOC.
-- SR is generated every 6 months.
-- PB is generated annually.
-- Expiration dates cannot be earlier than DateIssued.
-- Expiration records must always reflect the latest project status.
-
----
-
-## Status Transition Rules
-
-```text
-DOC → ONGOING
-EOT → EXTENDED
-COC → COMPLETED
-DOD → FULLYCOMPLETED
-```
-
-Expiration processing stops once a project reaches its terminal state.
-
----
-
-## Notification Rules
-
-- Generate notifications for upcoming expirations.
-- Generate notifications for expired records.
-- Link notifications to affected projects.
-- Execute monitoring automatically every day at 1:00 AM.
-
----
-
-## 📄 License
-
-This project was developed exclusively for DHSUD-HREDRD as part of the BSIT On-the-Job Training Program at STI College Legazpi.
+## Note
+This project was developed as part of a BSIT On-the-Job Training Program.

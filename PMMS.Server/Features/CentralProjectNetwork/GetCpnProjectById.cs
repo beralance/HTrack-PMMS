@@ -72,7 +72,6 @@ public sealed class GetCpnProjectById : IEndpoint
     {
         public async Task<AppResult<Response>> Handle(Query query, CancellationToken ct)
         {
-            // Query for the specific project while preserving our global safety guards
             var projectDto = await context.Projects
                 .AsNoTracking()
                 .Where(p => p.Id == query.Id && !p.IsDeleted && p.SetupStatus == ProjectSetupStatuses.Active)

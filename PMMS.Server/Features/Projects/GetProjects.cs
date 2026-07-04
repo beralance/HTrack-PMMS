@@ -83,13 +83,11 @@ public sealed class GetProjects : IEndpoint {
         {
             var assignedProvinces = userContext.AssignedProvinceIds;
 
-            // 1. Core Base Query: Scope data exclusively to non-deleted active records inside user boundaries
             var queryable = context.Projects
                 .AsNoTracking()
                 .Where(p => !p.IsDeleted && 
                             assignedProvinces.Contains(p.Municipality.ProvinceId));
 
-            // 2. Search Filter Execution
             if (!string.IsNullOrWhiteSpace(query.Search))
             {
                 var search = query.Search.Trim();
@@ -99,7 +97,6 @@ public sealed class GetProjects : IEndpoint {
                     EF.Functions.Like(p.LsNo, $"%{search}%"));
             }
 
-            // 3. Province Filter Integration
             if (query.ProvinceId.HasValue)
             {
                 if (!assignedProvinces.Contains(query.ProvinceId.Value))
@@ -112,10 +109,8 @@ public sealed class GetProjects : IEndpoint {
                 queryable = queryable.Where(p => p.Municipality.ProvinceId == query.ProvinceId.Value);
             }
 
-            // 4. Calculate Total Matching Item Counter
             var totalCount = await queryable.CountAsync(ct);
 
-            // 5. Execute Efficient Pagination Window & Flat Selective Mapping Projection
             var items = await queryable
                 .OrderByDescending(p => p.DateIssued)
                 .Skip((query.Page - 1) * query.PageSize)

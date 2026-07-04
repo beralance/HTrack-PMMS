@@ -14,7 +14,6 @@ public class Handler(PmmsDbContext context, IUserContext userContext) : IRequest
 {
     public async Task<AppResult<ResetExpirationResponse>> Handle(ResetExpirationCommand command, CancellationToken ct)
     {
-        // 1. Fetch Project including the Municipality navigation property for scoping checks
         var project = await context.Projects
             .Include(p => p.Municipality)
             .FirstOrDefaultAsync(p => p.Id == command.Id, ct);
@@ -24,7 +23,6 @@ public class Handler(PmmsDbContext context, IUserContext userContext) : IRequest
             return AppResult<ResetExpirationResponse>.Failure($"Project {command.Id} does not exist.", ErrorType.NotFound);
         }
 
-        // 2. Enforce data boundary authorizations based on assigned user provinces
         var userProvinces = userContext.AssignedProvinceIds;
         if (!userProvinces.Contains(project.Municipality.ProvinceId))
         {
@@ -34,7 +32,6 @@ public class Handler(PmmsDbContext context, IUserContext userContext) : IRequest
             );
         }
 
-        // 3. Determine business logic status flow safely (handling potential null extensions)
         var projectStatus = command switch
         {
             { HasCoc: true, HasDod: true } => ProjectStatuses.FullyCompleted,
@@ -43,7 +40,6 @@ public class Handler(PmmsDbContext context, IUserContext userContext) : IRequest
             _ => ProjectStatuses.OnGoing
         };
 
-        // 4. Update core project properties and synchronize extension flags
         project.CocDate = command.CocDate;
         project.HasCoc = command.HasCoc;
         project.DodDate = command.DodDate;
@@ -51,12 +47,10 @@ public class Handler(PmmsDbContext context, IUserContext userContext) : IRequest
         project.Status = projectStatus;
         project.IsExtended = command.ExtensionOfTime.HasValue;
         
-        // 5. Log system audit data
         project.IsModified = true;
         project.UpdatedAt = DateTimeOffset.UtcNow;
         project.ModifiedById = userContext.UserId;
 
-        // 6. Purge historical project expirations to allow a clean system calculation state
         var existingExpirations = await context.Expirations
             .Where(e => e.ProjectId == command.Id)
             .ToListAsync(ct);
@@ -66,7 +60,6 @@ public class Handler(PmmsDbContext context, IUserContext userContext) : IRequest
             context.Expirations.RemoveRange(existingExpirations);
         }
 
-        // 7. Recalculate brand-new tracking milestones from the clean source of truth
         var expirations = CreateExpirationBehavior.CalculateExpirations(
             project,
             projectStatus,
@@ -74,7 +67,6 @@ public class Handler(PmmsDbContext context, IUserContext userContext) : IRequest
             command.ExtensionOfTime
         );
         
-        // 8. Commit updated entities and new tracking rules to database storage
         await context.Expirations.AddRangeAsync(expirations, ct);
         await context.SaveChangesAsync(ct);
 

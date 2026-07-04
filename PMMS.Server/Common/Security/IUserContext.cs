@@ -14,16 +14,12 @@ public interface IUserContext
 
 public class UserContext(IHttpContextAccessor httpContextAccessor) : IUserContext
 {
-    // Access the User object from the current HTTP Request
     private ClaimsPrincipal? User => httpContextAccessor.HttpContext?.User;
 
-    // Extract the "sub" or "NameIdentifier" claim (Standard for User ID)
     public string? UserId => User?.FindFirstValue(ClaimTypes.NameIdentifier);
 
-    // Extract the email claim
     public string? Email => User?.FindFirstValue(ClaimTypes.Email);
 
-    // Helper to check if the user is logged in
     public bool IsAuthenticated => User?.Identity?.IsAuthenticated ?? false;
 
     public IEnumerable<string> Roles => User?
@@ -36,6 +32,5 @@ public class UserContext(IHttpContextAccessor httpContextAccessor) : IUserContex
         .Where(id => id.HasValue)
         .Select(id => id!.Value) ?? [];
 
-    // A helper method that leverages the built-in logic of ClaimsPrincipal
     public bool IsInRole(string roleName) => User?.IsInRole(roleName) ?? false;
 }

@@ -34,8 +34,8 @@ public sealed class Login : IEndpoint {
             RuleFor(x => x.Email)
                 .NotEmpty()
                 .EmailAddress()
-                .Must(email => email.EndsWith("@dhsud.hredrd.rv", StringComparison.OrdinalIgnoreCase))
-                .WithMessage("Only official DHSUD-HREDRD emails are permitted.");
+                .Must(email => email.EndsWith("@sample.com", StringComparison.OrdinalIgnoreCase))
+                .WithMessage("Only official emails are permitted.");
 
             RuleFor(x => x.Password)
                 .NotEmpty();
@@ -76,13 +76,11 @@ public sealed class Login : IEndpoint {
 
             var user = await userManager.FindByEmailAsync(command.Email);
 
-            // 1. Check if email exist
             if (user == null) 
             {
                 return AppResult<Response>.Failure("Invalid email or password.", ErrorType.Unauthorized);
             }
 
-            // 2. Verify if the account is not soft deleted
             if (user.IsDeleted == true)
             {
                 return AppResult<Response>.Failure("Invalid email or password.", ErrorType.Unauthorized);
@@ -90,7 +88,6 @@ public sealed class Login : IEndpoint {
 
             Console.WriteLine($"ssssssssssssssss: Password={command.Password}, Email={command.Email}");
             
-            // 3. Verify given password and lockout on failure
             var signInResult = await signInManager.CheckPasswordSignInAsync(
                 user,
                 command.Password,
@@ -101,7 +98,6 @@ public sealed class Login : IEndpoint {
                 return AppResult<Response>.Failure("Invalid email or password.", ErrorType.Unauthorized);
             }
 
-            // 4. Check if User have an assigned province given by Admin
             var roles = await userManager.GetRolesAsync(user);
 
             var assignedProvinces = await context.Assignments
@@ -118,7 +114,6 @@ public sealed class Login : IEndpoint {
                     ErrorType.Forbidden);
             }
 
-            // 5. Create a JWT token
             var claims = new List<Claim>
             {
                 new(ClaimTypes.NameIdentifier, user.Id),

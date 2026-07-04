@@ -13,9 +13,6 @@ public class ProjectDraftCreatedEventHandler(PmmsDbContext context, IHubContext<
 {
     public async Task Handle(DraftCreatedEvent notification, CancellationToken ct)
     {
-        // GOAL: gete all active users that are assigned to a province similar to the project
-        // user that are not soft deleted, and verified to true
-        //  is permanent should be true
         var targetUsers = await context.Assignments
             .Where(a => a.ProvinceId == notification.ProvinceId)
             .Select(p => p.UserId)

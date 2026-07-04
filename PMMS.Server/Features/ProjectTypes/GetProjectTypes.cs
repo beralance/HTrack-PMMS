@@ -45,7 +45,6 @@ public sealed class GetProjectTypes : IEndpoint
     {
         public async Task<AppResult<Response>> Handle(Query query, CancellationToken ct)
         {
-            // 1. Get municipalities
             var projectTypes = await context.ProjectTypes
                 .AsNoTracking()
                 .ProjectToType<Dto>()

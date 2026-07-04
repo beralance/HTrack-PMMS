@@ -82,18 +82,15 @@ public sealed class UpdateProject : IEndpoint {
         {
             var assignedProvinces = userContext.AssignedProvinceIds;
 
-            // 1. Fetch project with current location context
             var project = await context.Projects
                 .Include(p => p.Municipality)
                 .FirstOrDefaultAsync(p => p.Id == command.Id, ct);
 
-            // 2. Validate existence boundary
             if (project == null || project.IsDeleted)
             {
                 return AppResult<Response>.Failure($"Project {command.Id} was not found.", ErrorType.NotFound);
             }
 
-            // 3. Confirm user has permission to modify records in the project's CURRENT region
             if (!assignedProvinces.Contains(project.Municipality.ProvinceId))
             {
                 return AppResult<Response>.Failure(
@@ -101,7 +98,6 @@ public sealed class UpdateProject : IEndpoint {
                     ErrorType.Forbidden);
             }
 
-            // 4. Validate the NEW location if the municipality is changing
             if (project.MunicipalityId != command.MunicipalityId)
             {
                 var targetMunicipality = await context.Municipalities
@@ -121,7 +117,6 @@ public sealed class UpdateProject : IEndpoint {
                 }
             }
 
-            // 5. Validate that name updates don't cause duplicate conflicts with other projects
             var normalizedName = command.ProjectName.Trim().ToLower();
             var isDuplicateName = await context.Projects
                 .AnyAsync(p => p.Id != command.Id && p.ProjectName.ToLower() == normalizedName && !p.IsDeleted, ct);
@@ -131,7 +126,6 @@ public sealed class UpdateProject : IEndpoint {
                 return AppResult<Response>.Failure($"Another active project named '{command.ProjectName}' already exists.", ErrorType.Conflict);
             }
 
-            // 6. Explicitly update properties to avoid destructive null overwrites from automated mapping tools
             project.ProjectName = command.ProjectName;
             project.Developer = command.Developer;
             project.Owner = command.Owner;
@@ -144,7 +138,6 @@ public sealed class UpdateProject : IEndpoint {
             project.MunicipalityId = command.MunicipalityId;
             project.ProjectTypeId = command.ProjectTypeId;
 
-            // 7. Update mutation audit tracking properties
             project.IsModified = true;
             project.ModifiedById = userContext.UserId ?? string.Empty;
             project.UpdatedAt = DateTimeOffset.UtcNow;

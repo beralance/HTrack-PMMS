@@ -45,8 +45,8 @@ public sealed class UpdateUser : IEndpoint {
             RuleFor(x => x.Email)
                 .NotEmpty()
                 .EmailAddress()
-                .Must(email => email.EndsWith("@dhsud.hredrd.rv", StringComparison.OrdinalIgnoreCase))
-                .WithMessage("Only official DHSUD-HREDRD emails are permitted.");
+                .Must(email => email.EndsWith("@sample.com", StringComparison.OrdinalIgnoreCase))
+                .WithMessage("Only official emails are permitted.");
 
             RuleFor(x => x.Role)
                 .NotEmpty()
@@ -131,7 +131,6 @@ public sealed class UpdateUser : IEndpoint {
                 return AppResult<Response>.Failure($"Role {command.Role} does not exist.", ErrorType.NotFound);
             }
 
-            // prevent email conflict with other users
             var existingByEmail = await userManager.FindByEmailAsync(command.Email);
             if (existingByEmail is not null && existingByEmail.Id != user.Id)
             {
@@ -142,13 +141,11 @@ public sealed class UpdateUser : IEndpoint {
                 .Distinct()
                 .ToList();
 
-            // Domain rule: permanent users must have assignment
             if (normalizedRole.Equals(UserRoles.Permanent, StringComparison.OrdinalIgnoreCase) && provinceIds.Count == 0)
             {
                 return AppResult<Response>.Failure("Permanent users must have at least one province assignment.");
             }
 
-            // validate province ids
             if (provinceIds.Count != 0)
             {
                 var validProvinceIds = await context.Provinces
@@ -164,7 +161,6 @@ public sealed class UpdateUser : IEndpoint {
                 }
             }
 
-            // Optional guardrail: prevent self-demotion/removal from admin role
             if (!string.IsNullOrWhiteSpace(userContext.UserId) &&
                 user.Id == userContext.UserId &&
                 !normalizedRole.Equals(UserRoles.Admin, StringComparison.OrdinalIgnoreCase))
@@ -172,7 +168,6 @@ public sealed class UpdateUser : IEndpoint {
                 return AppResult<Response>.Failure("Own account cannot be removed.");
             }
 
-            // update email/username
             user.Email = command.Email;
             user.UserName = command.Email;
 
@@ -183,7 +178,6 @@ public sealed class UpdateUser : IEndpoint {
                 throw new ValidationException(errorMessage);
             }
 
-            // replace roles (single-role model)
             var currentRoles = await userManager.GetRolesAsync(user);
             if (currentRoles.Any())
             {
@@ -202,7 +196,6 @@ public sealed class UpdateUser : IEndpoint {
                 throw new ValidationException(errorMessage);
             }
 
-            // replace assignments
             var existingAssignments = await context.Assignments
                 .Where(a => a.UserId == user.Id)
                 .ToListAsync(ct);

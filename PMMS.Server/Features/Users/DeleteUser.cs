@@ -85,16 +85,13 @@ public sealed class DeleteUser : IEndpoint {
                 }
             }
 
-            // Soft delete fields
             user.IsDeleted = true;
             user.DeletedAt = DateTime.UtcNow;
             user.DeletedById = userContext.UserId;
 
-            // Block future sign-ins
             user.LockoutEnabled = true;
             user.LockoutEnd = DateTimeOffset.MaxValue;
 
-            // Invalidate existing auth sessions/tokens
             var stampResult = await userManager.UpdateSecurityStampAsync(user);
             if (!stampResult.Succeeded)
             {

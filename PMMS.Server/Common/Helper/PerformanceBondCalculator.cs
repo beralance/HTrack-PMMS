@@ -1,14 +1,5 @@
 namespace PMMS.Server.Common.Helper;
 
-/// <summary>
-/// 
-/// Calculate Performance Bond based on  date issued
-/// Performance bond due = every 12 months
-/// 
-/// </summary>
-/// <param name="dateIssued"></param>
-
-
 public class PerformanceBondCalculator(DateOnly dateIssued)
 {
     private const int AnnualIntervalMonths = 12;

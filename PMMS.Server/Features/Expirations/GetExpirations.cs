@@ -75,7 +75,6 @@ public sealed class GetExpirations : IEndpoint
         public async Task<AppResult<Response>> Handle(Query query, CancellationToken ct)
         {
 
-            // 1. Base Query targeted directly at active Expirations matching user's security territory
             var queryable = context.Expirations
                 .AsNoTracking()
                 .Where(e => e.IsActive == true && 
@@ -91,7 +90,6 @@ public sealed class GetExpirations : IEndpoint
                 Console.WriteLine($"DEBUG: Record ID: {rec.Id}, IsActive: {rec.IsActive}, Status: {rec.Status}");
             }
 
-            // 2. Heavy Filtering Suite with integrated tenant boundary security checks
             if (!string.IsNullOrWhiteSpace(query.Search))
             {
                 var search = query.Search.Trim();
@@ -105,18 +103,15 @@ public sealed class GetExpirations : IEndpoint
                 queryable = queryable.Where(e => e.Type == query.Type.Value);
             }
 
-            // 3. Default Status Filtering
             if (query.Status.HasValue)
             {
                 queryable = queryable.Where(e => e.Status == query.Status.Value);
             }
 
-            // 4. Get Total Count based on filtered, deferred structural tree
             var totalCount = await queryable.CountAsync(ct);
 
             Console.WriteLine($"TOTAL Count: {totalCount}");
 
-            // 5. Paginate and Project data allocations straight into the flat DTO
             var items = await queryable
                 .OrderBy(e => e.ExpiresOn)
                 .Skip((query.Page - 1) * query.PageSize)

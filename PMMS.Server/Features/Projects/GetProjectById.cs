@@ -66,7 +66,6 @@ public sealed class GetProjectById : IEndpoint {
         {
             var assignedProvinces = userContext.AssignedProvinceIds;
 
-            // 1. Fetch Project with inline security constraints to save performance trips
             var project = await context.Projects
                 .AsNoTracking()
                 .Include(p => p.ProjectType)
@@ -75,7 +74,6 @@ public sealed class GetProjectById : IEndpoint {
                 .Where(p => p.Id == query.Id && !p.IsDeleted && assignedProvinces.Contains(p.Municipality.ProvinceId))
                 .FirstOrDefaultAsync(ct);
 
-            // 2. If null, verify if it's missing completely or just walled off by security permissions
             if (project == null)
             {
                 var existsGlobally = await context.Projects
@@ -91,7 +89,6 @@ public sealed class GetProjectById : IEndpoint {
                 return AppResult<Response>.Failure($"Project {query.Id} was not found.", ErrorType.NotFound);
             }
 
-            // 3. Map manually or via Mapster to your flat DTO shape safely
             var projectDto = new Dto(
                 project.Id,
                 project.DateIssued,

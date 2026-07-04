@@ -43,18 +43,15 @@ public sealed class DeleteProject : IEndpoint {
         {
             var userId = userContext.UserId;
 
-            // 1. Fetch Project based on given Id with necessary relationship data
             var project = await context.Projects
                 .Include(p => p.Municipality)
                 .FirstOrDefaultAsync(p => p.Id == command.ProjectId, ct);
 
-            // 2. Validate existence and previous soft-delete mutations
             if (project == null || project.IsDeleted)
             {
                 return AppResult<Response>.Failure($"Project {command.ProjectId} was not found.", ErrorType.NotFound);
             }
 
-            // 3. Verify security access boundaries against user regional assignments
             if (!userContext.AssignedProvinceIds.Contains(project.Municipality.ProvinceId))
             {
                 return AppResult<Response>.Failure(
@@ -62,14 +59,12 @@ public sealed class DeleteProject : IEndpoint {
                     ErrorType.Forbidden);
             }
 
-            // 4. Perform Parent Soft Delete
             var now = DateTimeOffset.UtcNow;
             project.IsDeleted = true;
             project.DeletedById = userId;
             project.DeletedAt = now;
             project.UpdatedAt = now;
 
-            // 5. EF Core Bulk Update: Cascade deactivation directly to database engine without row loading
             await context.Expirations
                 .Where(e => e.ProjectId == command.ProjectId && e.IsActive)
                 .ExecuteUpdateAsync(setters => setters
@@ -77,7 +72,6 @@ public sealed class DeleteProject : IEndpoint {
                     .SetProperty(e => e.UpdatedAt, now), 
                     ct);
 
-            // 6. Commit the parent project changes
             await context.SaveChangesAsync(ct);
 
             var res = new Response(

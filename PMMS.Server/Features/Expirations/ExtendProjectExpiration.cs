@@ -58,7 +58,6 @@ public sealed class ExtendProjectExpiration : IEndpoint
         {
             var userId = userContext.UserId;
 
-            // 1. Fetch project profile and verify state preconditions
             var project = await context.Projects
                 .FirstOrDefaultAsync(p => p.Id == command.ProjectId, ct);
 
@@ -78,7 +77,6 @@ public sealed class ExtendProjectExpiration : IEndpoint
             }
 
 
-            // 2. Clear any existing historical EOT tracks to maintain a clean timeline record
             var existingExpiration = await context.Expirations
                 .FirstOrDefaultAsync(e => 
                     e.ProjectId == command.ProjectId && 
@@ -90,7 +88,6 @@ public sealed class ExtendProjectExpiration : IEndpoint
             }
 
 
-            // 3. Spool up the new Extension of Time (EOT) tracking row
             var addedExtension = new Expiration
             {
                 ProjectId = command.ProjectId,
@@ -103,7 +100,6 @@ public sealed class ExtendProjectExpiration : IEndpoint
 
             await context.Expirations.AddAsync(addedExtension, ct);
 
-            // 4. Conclude the original Date of Completion (DOC) row, preserving its historical track intact
             var dateOfCompletion = await context.Expirations
                 .FirstOrDefaultAsync(e => 
                     e.ProjectId == command.ProjectId && 
@@ -127,14 +123,12 @@ public sealed class ExtendProjectExpiration : IEndpoint
                 dateOfCompletion.UpdatedAt = DateTimeOffset.UtcNow;
             }
 
-            // 5. Update global project metrics and status tracking flags
             project.IsExtended = true;
             project.Status = ProjectStatuses.Extended;
             project.UpdatedAt = DateTime.UtcNow;
             project.IsModified = true;
             project.ModifiedById = userId;
 
-            // 6. Recalculate upcoming rolling milestone windows relative to the new EOT limit
             var rollingMilestones = await context.Expirations
                 .Where(e => e.ProjectId == command.ProjectId && 
                            (e.Type == ExpirationTypes.SemestralReport || e.Type == ExpirationTypes.PerformanceBond) &&
@@ -149,7 +143,6 @@ public sealed class ExtendProjectExpiration : IEndpoint
                 {
                     int interval = milestone.Type == ExpirationTypes.SemestralReport ? 6 : 12;
                     
-                    // Re-evaluate next valid execution step against today's date
                     var (nextDate, _) = calculator.CalculateUpcoming(interval);
                     
                     milestone.ExpiresOn = nextDate;
@@ -157,7 +150,6 @@ public sealed class ExtendProjectExpiration : IEndpoint
                 }
             }
             
-            // 7. Commit transaction blocks to storage
             await context.SaveChangesAsync(ct);
 
             var res = new Response(

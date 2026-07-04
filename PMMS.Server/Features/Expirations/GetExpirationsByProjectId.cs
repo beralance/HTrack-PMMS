@@ -69,7 +69,6 @@ public sealed class GetExpirationsByProjectId : IEndpoint
         {
             
 
-            // 1. Fetch project profile and nest child history elements in a single optimized pass
             var projectWithExpirations = await context.Projects
                 .AsNoTracking()
                 .Where(p => p.Id == query.ProjectId && 
@@ -105,7 +104,6 @@ public sealed class GetExpirationsByProjectId : IEndpoint
                 ))
                 .FirstOrDefaultAsync(ct);
 
-            // 2. Evaluate query outputs if nothing was returned
             if (projectWithExpirations is null)
             {
                 return AppResult<Response>.Failure(
@@ -113,7 +111,6 @@ public sealed class GetExpirationsByProjectId : IEndpoint
                     ErrorType.NotFound);
             }
 
-            // 3. Formulate success payload
             var res = new Response(
                 Project: projectWithExpirations,
                 Message: $"Project '{projectWithExpirations.ProjectName}' along with its complete expiration tracking history loaded successfully."

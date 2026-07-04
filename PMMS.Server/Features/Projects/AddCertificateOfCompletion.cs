@@ -67,7 +67,6 @@ public sealed class AddCertificateOfCompletion : IEndpoint
         {
             var userId = userContext.UserId;
 
-            // 1. Load project including its Municipality context to evaluate regional permissions
             var project = await context.Projects
                 .Include(p => p.Municipality)
                 .FirstOrDefaultAsync(p => p.Id == command.ProjectId, ct);
@@ -77,7 +76,6 @@ public sealed class AddCertificateOfCompletion : IEndpoint
                 return AppResult<Response>.Failure($"Project {command.ProjectId} was not found.", ErrorType.NotFound);
             }
 
-            // 2. Verify regional data security permission boundaries
             if (!userContext.AssignedProvinceIds.Contains(project.Municipality.ProvinceId))
             {
                 return AppResult<Response>.Failure(
@@ -85,7 +83,6 @@ public sealed class AddCertificateOfCompletion : IEndpoint
                     ErrorType.Forbidden);
             }
 
-            // 3. Verify workflow pre-conditions
             if (project.SetupStatus != ProjectSetupStatuses.Active)
             {
                 return AppResult<Response>.Failure($"Project {command.ProjectId} is not currently under active expiration tracking.", ErrorType.Conflict);
@@ -101,12 +98,10 @@ public sealed class AddCertificateOfCompletion : IEndpoint
                 return AppResult<Response>.Failure($"The COC date cannot be earlier than the project issuance date ({project.DateIssued}).", ErrorType.Conflict);
             }
 
-            // 4. Load all associated timeline items
             var expirations = await context.Expirations
                 .Where(e => e.ProjectId == project.Id)
                 .ToListAsync(ct);
 
-            // 5. Capture EOT state variables BEFORE mutating project status to Completed
             bool hasActiveEot = project.IsExtended && project.Status == ProjectStatuses.Extended;
 
             var activeEotRecord = expirations.FirstOrDefault(e => e.Type == ExpirationTypes.ExtensionOfTime && e.IsActive);
@@ -114,7 +109,6 @@ public sealed class AddCertificateOfCompletion : IEndpoint
                 ? (activeEotRecord.ExpiresOn ?? command.CocDate)
                 : command.CocDate;
 
-            // 6. Mutate Parent Project State
             var now = DateTimeOffset.UtcNow;
             project.CocDate = command.CocDate;
             project.HasCoc = true;
@@ -123,7 +117,6 @@ public sealed class AddCertificateOfCompletion : IEndpoint
             project.ModifiedById = userId ?? string.Empty;
             project.UpdatedAt = now;
 
-            // 7. Cascade closures to open tracking items
             var calculator = new ProjectTimelineCalculator(project.DateIssued);
 
             foreach (var expiration in expirations)

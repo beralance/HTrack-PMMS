@@ -26,7 +26,6 @@ public sealed class PmmsDbSeeder(
         RoleManager<IdentityRole> roleManager,
         CancellationToken ct = default)
     {
-        // Professional: schema by migrations, not EnsureCreated
         await context.Database.MigrateAsync(ct);
 
         await SeedRolesAsync(roleManager);
@@ -53,7 +52,7 @@ public sealed class PmmsDbSeeder(
 
     private async Task SeedAdminUserAsync(UserManager<ApplicationUser> userManager)
     {
-        var adminEmail = _configuration["Seed:Admin:Email"] ?? "admin@dhsud.hredrd.rv";
+        var adminEmail = _configuration["Seed:Admin:Email"] ?? "admin@sample.com";
         var adminPassword = _configuration["Seed:Admin:Password"];
 
         if (string.IsNullOrWhiteSpace(adminPassword))

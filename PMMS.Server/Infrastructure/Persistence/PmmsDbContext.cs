@@ -19,14 +19,11 @@ public class PmmsDbContext(DbContextOptions<PmmsDbContext> options)
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
-        // required for identity tables
         base.OnModelCreating(builder);
 
-        // Auto-apply all IEntityTypeConfiguration classes
         builder.ApplyConfigurationsFromAssembly(typeof(PmmsDbContext).Assembly);
         builder.HasPostgresExtension("citext");
 
-        // PostgreSQL Naming Convention: Convert everything to snake_case
         foreach (var entity in builder.Model.GetEntityTypes())
         {
             var tableName = entity.GetTableName()?.ToLower();

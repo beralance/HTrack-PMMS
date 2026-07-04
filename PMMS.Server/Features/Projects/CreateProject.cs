@@ -82,7 +82,6 @@ public sealed class CreateProject : IEndpoint {
     {
         public async Task<AppResult<Response>> Handle(Command command, CancellationToken ct)
         {
-            // 1. Check if Project name already exists (Case-Insensitive Normalization)
             var normalizedName = command.ProjectName.Trim().ToLower();
             var isDuplicate = await context.Projects
                 .AnyAsync(p => p.ProjectName.ToLower() == normalizedName && !p.IsDeleted, ct);
@@ -92,7 +91,6 @@ public sealed class CreateProject : IEndpoint {
                 return AppResult<Response>.Failure($"Project '{command.ProjectName}' already exists.", ErrorType.Conflict);
             }
 
-            // 2. Get the province of the chosen municipality
             var municipality = await context.Municipalities
                 .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.Id == command.MunicipalityId, ct);
@@ -102,7 +100,6 @@ public sealed class CreateProject : IEndpoint {
                 return AppResult<Response>.Failure("The specified municipality does not exist.", ErrorType.Validation);
             }
 
-            // 3. Verify if User can add the Project based on his Assigned Province boundaries
             var userProvinces = userContext.AssignedProvinceIds;
             
             if (!userProvinces.Contains(municipality.ProvinceId))
@@ -112,7 +109,6 @@ public sealed class CreateProject : IEndpoint {
                     ErrorType.Forbidden);
             }
 
-            // 4. Map and Persist data rows
             var project = new Project
             {
                 DateIssued = command.DateIssued,

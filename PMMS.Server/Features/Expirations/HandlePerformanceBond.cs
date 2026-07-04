@@ -59,7 +59,6 @@ public sealed class HandlePerformanceBond : IEndpoint
         {
             var userId = userContext.UserId;
 
-            // 1. Verify project exists
             var project = await context.Projects
                 .Where(p => p.Id == command.ProjectId)
                 .FirstOrDefaultAsync(ct);
@@ -69,20 +68,17 @@ public sealed class HandlePerformanceBond : IEndpoint
                 return AppResult<Response>.Failure($"Project {command.ProjectId} was not found.", ErrorType.NotFound);
             }
 
-            // 2. Block updates if project is in a terminal state
             if (project.Status == ProjectStatuses.Cancelled || 
                 project.Status == ProjectStatuses.FullyCompleted)
             {
                 return AppResult<Response>.Failure($"Cannot handle Performance Bond because the project is already {project.Status}.", ErrorType.Conflict);
             }
 
-            // 3. Ensure project is activated
             if (project.SetupStatus != ProjectSetupStatuses.Active)
             {
                 return AppResult<Response>.Failure($"Project {command.ProjectId} is not active.");
             }
 
-            // 4. Retrieve active Performance Bond tracking record
             var performanceBond = await context.Expirations
                 .FirstOrDefaultAsync(e => 
                     e.ProjectId == command.ProjectId && 
@@ -93,7 +89,6 @@ public sealed class HandlePerformanceBond : IEndpoint
                 return AppResult<Response>.Failure("Performance Bond expiration was not found for this project.", ErrorType.NotFound);
             }
 
-            // 5. Restrict updates to valid processing statuses
             ExpirationStatuses?[] allowedStatuses =
             [
                 ExpirationStatuses.Ongoing, 
@@ -112,20 +107,16 @@ public sealed class HandlePerformanceBond : IEndpoint
                 return AppResult<Response>.Failure("Cannot renew a Performance Bond that does not have an initial expiration date.");
             }
 
-            // 6. Establish ultimate project deadline (ExtensionOfTime if extended, otherwise standard DateOfCompletion)
             DateOnly projectEndDate = project.IsExtended && project.Status == ProjectStatuses.Extended
                 ? (await context.Expirations.FirstOrDefaultAsync(e => e.ProjectId == command.ProjectId && e.Type == ExpirationTypes.ExtensionOfTime, ct))?.ExpiresOn 
                     ?? DateOnly.FromDateTime(DateTime.Today)
                 : (await context.Expirations.FirstOrDefaultAsync(e => e.ProjectId == command.ProjectId && e.Type == ExpirationTypes.DateOfCompletion, ct))?.CompletedAt 
                     ?? DateOnly.FromDateTime(DateTime.Today);
 
-            // Calculate potential next milestone window (12 Months for Performance Bonds)
             DateOnly nextPbDate = performanceBond.ExpiresOn.Value.AddMonths(12);
 
-            // 7. Determine timeline lifecycle closure
             if (nextPbDate >= projectEndDate)
             {
-                // Next milestone overshoots project end date: terminate cycle and complete record
                 performanceBond.LastExpirationDate = performanceBond.ExpiresOn;
                 performanceBond.ExpiresOn = null;
                 performanceBond.CompletedAt = projectEndDate;
@@ -133,13 +124,11 @@ public sealed class HandlePerformanceBond : IEndpoint
             }
             else
             {
-                // Timeline still active: roll milestone forward by 12 months
                 performanceBond.LastExpirationDate = performanceBond.ExpiresOn;
                 performanceBond.ExpiresOn = nextPbDate;
                 performanceBond.Status = ExpirationStatuses.Ongoing;
             }
 
-            // 8. Track system auditing metadata
             performanceBond.UpdatedAt = DateTimeOffset.UtcNow;
             performanceBond.HandledAt = DateOnly.FromDateTime(DateTime.Today);
             performanceBond.HandledById = userId;
@@ -147,7 +136,6 @@ public sealed class HandlePerformanceBond : IEndpoint
 
             await context.SaveChangesAsync(ct);
 
-            // 9. Generate adaptive message output based on final cycle state
             var res = new Response(
                 ProjectId: project.Id,
                 Message: performanceBond.Status == ExpirationStatuses.Completed

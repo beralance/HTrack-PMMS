@@ -18,10 +18,8 @@ public class ExpirationCheckJob(
         var sixtyDaysFromNow = today.AddDays(60);
         bool changesMade = false;
         
-        // Track unique province IDs to aggregate targeted real-time UI refresh triggers
         var affectedProvinceIds = new HashSet<int>(); 
 
-        // 1. Process upcoming warnings (Items entering the 60-day threshold window)
         var priorExpirations = await context.Expirations
             .Include(e => e.Project)
                 .ThenInclude(p => p!.Municipality)
@@ -36,7 +34,6 @@ public class ExpirationCheckJob(
         
         foreach (var expiration in priorExpirations)
         {
-            // Transition tracking status to NearExpiration warning block
             expiration.Status = ExpirationStatuses.NearExpiration;
             changesMade = true;
 
@@ -47,10 +44,8 @@ public class ExpirationCheckJob(
 
             string readableType = (expiration.Type?.ToString() ?? "Unknown").SplitCamelCase();
 
-            // Log Cron changes
             Console.WriteLine($"[ExpirationCheckJob] Entered 2 months priority window: \n'{readableType}' for project '{expiration.Project?.ProjectName}' is expiring on {expiration.ExpiresOn:MMMM dd, yyyy}.");
 
-            // Record a persistent notification entry
             context.Notifications.Add(new Domain.Entities.Notification
             {
                 Title = "Upcoming Expiration Warning!",
@@ -61,7 +56,6 @@ public class ExpirationCheckJob(
             });
         }
 
-        // 2. Process overdue items (Handles missed deadlines & prevents time-sync infrastructure drift)
         var expiredItems = await context.Expirations
             .Include(e => e.Project)
                 .ThenInclude(p => p!.Municipality)
@@ -75,7 +69,6 @@ public class ExpirationCheckJob(
 
         if (expiredItems.Count != 0)
         {
-            // Gather distinct project profiles to pre-calculate severities efficiently
             var affectedProjectIds = expiredItems.Select(e => e.ProjectId).Distinct().ToList();
 
             var projectExpiredCounts = await context.Expirations
@@ -105,7 +98,6 @@ public class ExpirationCheckJob(
                     ProjectId = expiration.ProjectId
                 });
 
-                // 3. Recalculate and scale regional project severity metrics in-memory
                 if (expiration.Project != null && expiration.ProjectId.HasValue)
                 {
                     projectExpiredCounts.TryGetValue(expiration.ProjectId.Value, out int currentDbCount);
@@ -123,12 +115,10 @@ public class ExpirationCheckJob(
             }
         }
 
-        // 4. Conclude batch tracking cycle, save changes, and announce websocket push alerts
         if (changesMade)
         {
             await context.SaveChangesAsync();
             
-            // Dispatch a real-time localized message broadcast strictly to impacted user groups
             foreach (var provinceId in affectedProvinceIds)
             {
                 string groupName = $"Province_{provinceId}";
